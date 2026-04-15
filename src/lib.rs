@@ -7,7 +7,7 @@ use image::{
     GenericImageView,
     ImageError,
     imageops::{FilterType, resize},
-    io::Reader
+    ImageReader
 };
 
 
@@ -53,7 +53,7 @@ impl TileCreator {
     ) -> MultiresResult<Self> {
         let file = File::open(image_path.clone())?;
         let reader = BufReader::new(file);
-        let mut image_reader = Reader::new(reader).with_guessed_format()?;
+        let mut image_reader = ImageReader::new(reader).with_guessed_format()?;
         image_reader.no_limits();
         let im = image_reader.decode()?;
         let (x_size, y_size) = im.dimensions();
