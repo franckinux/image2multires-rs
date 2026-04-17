@@ -1,22 +1,32 @@
-This programs converts a single image to tiles in multires format.
+The function of this program is to convert a single image into tiles in multires
+file scheme. In the context of panoramic images production, images are cube
+faces and are square-shaped.
 
-This work has been inspired by the Pannellum
+This tool is not limited to square-shaped images, and can be used on
+rectangle-shaped images as well.
+
+This work has been inspired by Pannellum
 (https://github.com/mpetroff/pannellum) and dzi (https://github.com/n-k/dzi)
 projects.
 
-It is usualy used to convert a cube face to tiles. In this case, the image is a
-square but this tool is generalized so that it can work on rectangle shaped
-images.
-
 I made the choice of a tool that makes a unique operation. So it does not
-operate on the 6 faces nor it does not generate a configuration file for any
-panarama viewer. For these purposes, you can use a script of your own. An
-example shell script `cube2tiles.sh` is provided in the scripts directory.
+iterate over the 6 faces of the cube, nor does it generate a configuration file
+for any panorama viewer. For these purposes, you can use a script of your own.
+An example shell script `cube2tiles.sh` is provided in the `scripts` directory.
 
-I didn't find any specification of the multires tile format. You can find the
-Python script `generate.py` in the test directory. It comes from the Pannellum
-project. This a modified version of the original script: the convertion from
-equirectangular to cube faces has been removed.
+I didn't find any specification of the multires tile format used by Pannellum
+viewer. The Python script `generate.py` in the test directory serves this
+propose. This is a modified version of the original script from Pannellum: the
+convertion from equirectangular to cube faces has been removed.
+
+As a memo for myself, in the hope that it will be useful to others, an
+equirectangular image can the converted into cube faces using ffmpeg:
+
+    ffmpeg -i pano.tif -vf \
+    "v360=equirect:c6x1:w=24000:h=4000:interp=lanczos,untile=6x1" \
+    faces/face_%d.png
+
+where $h$ is the face size and $w = 6 \times h$. The convertion is really fast !
 
 # Usage
 
@@ -36,13 +46,18 @@ Options:
   -V, --version                Print version
 ```
 
-# General context or workflow
+# My workflow for generating a parorama
 
-My workflow for generating a parorama is:
+This is a contextualized explanation on when this tool is used. The steps are
+the following:
 
-1. Stitch the images to produce an equirectangular image;
-2. Convert the equirectangular image to 6 cube faces;
-3. Do some changes on the down image to have a nadir without foreign objects,
-   artifacts or hole;
-4. Generate tiles from the cube faces. This is where this program operates;
-5. Delete the original equirectangular image.
+1. Stitch the images to produce an equirectangular image using the image
+   stitcher of your choice (hugin, ...);
+2. Convert the equirectangular image into 6 cube faces;
+3. Delete the original equirectangular image;
+4. Do some changes on the down image to have a nadir without foreign objects,
+   artifacts or holes (gimp + nona);
+5. Generate tiles from the cube faces. **This is where this program operates**;
+6. Upload the tiles to a web server using the protocol of your choice (ftp,
+   ...);
+7. Write and upload a html page to execute the Pannellum panorama viewer.
